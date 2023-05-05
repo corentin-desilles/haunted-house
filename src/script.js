@@ -23,6 +23,16 @@ scene.fog = fog
  */
 const textureLoader = new THREE.TextureLoader()
 
+const doorColorTexture = textureLoader.load('/textures/door/color.jpg')
+const doorAlphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const doorAmbientOcclusionTexture = textureLoader.load(
+  '/textures/door/ambientOcclusion.jpg'
+)
+const doorHeightTexture = textureLoader.load('/textures/door/height.jpg')
+const doorNormalTexture = textureLoader.load('/textures/door/normal.jpg')
+const doorMetalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+const doorRoughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+
 /**
  * House
  */
@@ -49,8 +59,23 @@ house.add(roof)
 
 // Door
 const door = new THREE.Mesh(
-  new THREE.PlaneGeometry(2, 2),
-  new THREE.MeshStandardMaterial({ color: '#aa7b7b' })
+  new THREE.PlaneGeometry(2.2, 2.2, 100, 100), // parameters: width,height and add vertices for details
+  new THREE.MeshStandardMaterial({
+    map: doorColorTexture, // color
+    transparent: true,
+    alphaMap: doorAlphaTexture, // control opacity with black/white, here, used to outline the door
+    aoMap: doorAmbientOcclusionTexture, // !!! three.js built-in materials needs to be provided with uv2 attribute to support aoMap
+    displacementMap: doorHeightTexture, // move vertices to give depth (the more black the more depth)
+    displacementScale: 0.1, //reduce depth effect because lot of vertices
+    normalMap: doorNormalTexture, //illusion of light bouncing
+    metalnessMap: doorMetalnessTexture,
+    roughnessMap: doorRoughnessTexture,
+  })
+)
+// uv coordinate for the aoMap.
+door.geometry.setAttribute(
+  'uv2',
+  new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array, 2)
 )
 door.position.y = 1
 door.position.z = 2 + 0.01
